@@ -14,9 +14,25 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:textSize="20sp"
-        android:gravity="center"
         android:textColor="#000000"
-        android:text="Вопрос или действие появится здесь"/>
+        android:gravity="center"/>
+
+    <Button
+        android:id="@+id/truthButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Правда"
+        android:background="#FFC5C5"
+        android:visibility="gone"/>
+
+    <Button
+        android:layout_marginTop="8dp"
+        android:id="@+id/actionButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Действие"
+        android:background="#FFC5C5"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/nextButton"
