@@ -18,7 +18,6 @@ class GameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        // Загружаем вопросы из файлов
         friendsQuestions = AssetReader.readLinesFromAsset(this, "friends_questions.txt")
         romanticQuestions = AssetReader.readLinesFromAsset(this, "romantic_questions.txt")
         romanticActions = AssetReader.readLinesFromAsset(this, "romantic_actions.txt")
@@ -28,7 +27,6 @@ class GameActivity : AppCompatActivity() {
 
         mode = intent.getStringExtra("mode") ?: "friends"
 
-        // Проверяем, что вопросы загружены
         if (friendsQuestions.isEmpty() || romanticQuestions.isEmpty() || romanticActions.isEmpty()) {
             contentTextView.text = "Ошибка загрузки вопросов"
             nextButton.isEnabled = false
