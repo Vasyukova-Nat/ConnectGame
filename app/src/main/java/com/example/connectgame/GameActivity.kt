@@ -14,6 +14,7 @@ class GameActivity : AppCompatActivity() {
     private lateinit var mode: String
 
     private lateinit var friendsQuestions: List<String>
+    private lateinit var friendsActions: List<String>
     private lateinit var romanticQuestions: List<String>
     private lateinit var romanticActions: List<String>
 
@@ -22,6 +23,7 @@ class GameActivity : AppCompatActivity() {
         setContentView(R.layout.activity_game)
 
         friendsQuestions = AssetReader.readLinesFromAsset(this, "friends_questions.txt")
+        friendsActions = AssetReader.readLinesFromAsset(this, "friends_actions.txt")
         romanticQuestions = AssetReader.readLinesFromAsset(this, "romantic_questions.txt")
         romanticActions = AssetReader.readLinesFromAsset(this, "romantic_actions.txt")
 
@@ -32,7 +34,7 @@ class GameActivity : AppCompatActivity() {
 
         mode = intent.getStringExtra("mode") ?: "friends"
 
-        if (friendsQuestions.isEmpty() || romanticQuestions.isEmpty() || romanticActions.isEmpty()) {
+        if (friendsQuestions.isEmpty() || friendsActions.isEmpty() || romanticQuestions.isEmpty() || romanticActions.isEmpty()) {
             contentTextView.text = "Ошибка загрузки вопросов"
             truthButton.isEnabled = false
             actionButton.isEnabled = false
@@ -41,29 +43,21 @@ class GameActivity : AppCompatActivity() {
         }
 
         setupUI()
-        showInitialContent()
     }
 
     private fun setupUI() {
-        if (mode == "friends") {
-            truthButton.visibility = View.GONE // В дружеском режиме скрываем кнопки Правды/Действия
+        truthButton.visibility = View.VISIBLE
+        actionButton.visibility = View.VISIBLE
+        nextButton.visibility = View.GONE
+        truthButton.setOnClickListener {
+            showRandomQuestion()
+            truthButton.visibility = View.GONE
             actionButton.visibility = View.GONE
-            nextButton.setOnClickListener { showRandomQuestion() }
-        } else {
-            truthButton.visibility = View.VISIBLE
-            actionButton.visibility = View.VISIBLE
-            nextButton.visibility = View.GONE
-
-            truthButton.setOnClickListener { showRandomQuestion() }
-            actionButton.setOnClickListener { showRandomAction() }
         }
-    }
-
-    private fun showInitialContent() {
-        contentTextView.text = if (mode == "friends") {
-            "Начать? (кнопка 'Далее' со стрелочкой)"
-        } else {
-            "Выберите 'Правда' или 'Действие'!"
+        actionButton.setOnClickListener {
+            showRandomAction()
+            truthButton.visibility = View.GONE
+            actionButton.visibility = View.GONE
         }
     }
 
@@ -75,21 +69,18 @@ class GameActivity : AppCompatActivity() {
         }
 
         val randomQuestion = questions.random()
-        contentTextView.text = "$randomQuestion"
-
-        if (mode == "romantic") {
-            truthButton.visibility = View.GONE
-            actionButton.visibility = View.GONE
-            nextButton.visibility = View.VISIBLE
-            nextButton.setOnClickListener { resetChoiceButtons() }
-        }
+        contentTextView.text = randomQuestion
+        showNextButton()
     }
 
     private fun showRandomAction() {
-        val randomAction = romanticActions.random()
+        val actions = if (mode == "friends") friendsActions else romanticActions
+        val randomAction = actions.random()
         contentTextView.text = "Действие: $randomAction"
-        truthButton.visibility = View.GONE
-        actionButton.visibility = View.GONE
+        showNextButton()
+    }
+
+    private fun showNextButton() {
         nextButton.visibility = View.VISIBLE
         nextButton.setOnClickListener { resetChoiceButtons() }
     }
