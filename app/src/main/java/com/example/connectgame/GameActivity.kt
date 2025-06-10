@@ -17,6 +17,7 @@ class GameActivity : AppCompatActivity() {
     private lateinit var friendsActions: List<String>
     private lateinit var romanticQuestions: List<String>
     private lateinit var romanticActions: List<String>
+    private lateinit var bothActions: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +27,7 @@ class GameActivity : AppCompatActivity() {
         friendsActions = AssetReader.readLinesFromAsset(this, "friends_actions.txt")
         romanticQuestions = AssetReader.readLinesFromAsset(this, "romantic_questions.txt")
         romanticActions = AssetReader.readLinesFromAsset(this, "romantic_actions.txt")
+        bothActions = AssetReader.readLinesFromAsset(this, "both_actions.txt")
 
         contentTextView = findViewById(R.id.contentTextView)
         truthButton = findViewById(R.id.truthButton)
@@ -74,9 +76,9 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun showRandomAction() {
-        val actions = if (mode == "friends") friendsActions else romanticActions
+        val actions = if (mode == "friends") friendsActions + bothActions else romanticActions + bothActions
         val randomAction = actions.random()
-        contentTextView.text = "Действие: $randomAction"
+        contentTextView.text = randomAction
         showNextButton()
     }
 
