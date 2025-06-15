@@ -20,7 +20,7 @@
     <Button
         android:id="@+id/friendsButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="Для друзей"
         android:layout_marginBottom="16dp"
         android:backgroundTint="#4CAF50"
@@ -29,9 +29,18 @@
     <Button
         android:id="@+id/romanticButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="Для романтического знакомства"
-        android:backgroundTint="#E91E63"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="#E93A74"
+        android:textColor="#FFFFFF"/>
+
+    <Button
+        android:id="@+id/hotButton"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Hot"
+        android:backgroundTint="#F8003E"
         android:textColor="#FFFFFF"/>
 
 </LinearLayout>

@@ -12,6 +12,7 @@ class MainActivity : AppCompatActivity() {
 
         val friendsButton = findViewById<Button>(R.id.friendsButton)
         val romanticButton = findViewById<Button>(R.id.romanticButton)
+        val hotButton = findViewById<Button>(R.id.hotButton)
 
         friendsButton.setOnClickListener {
             val intent = Intent(this, GameActivity::class.java)
@@ -22,6 +23,12 @@ class MainActivity : AppCompatActivity() {
         romanticButton.setOnClickListener {
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("mode", "romantic")
+            startActivity(intent)
+        }
+
+        hotButton.setOnClickListener {
+            val intent = Intent(this, GameActivity::class.java)
+            intent.putExtra("mode", "hot")
             startActivity(intent)
         }
     }

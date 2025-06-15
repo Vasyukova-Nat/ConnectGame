@@ -18,6 +18,8 @@ class GameActivity : AppCompatActivity() {
     private lateinit var romanticQuestions: List<String>
     private lateinit var romanticActions: List<String>
     private lateinit var bothActions: List<String>
+    private lateinit var hotQuestions: List<String>
+    private lateinit var hotActions: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,8 @@ class GameActivity : AppCompatActivity() {
         romanticQuestions = AssetReader.readLinesFromAsset(this, "romantic_questions.txt")
         romanticActions = AssetReader.readLinesFromAsset(this, "romantic_actions.txt")
         bothActions = AssetReader.readLinesFromAsset(this, "both_actions.txt")
+        hotQuestions = AssetReader.readLinesFromAsset(this, "hot_questions.txt")
+        hotActions = AssetReader.readLinesFromAsset(this, "hot_actions.txt")
 
         contentTextView = findViewById(R.id.contentTextView)
         truthButton = findViewById(R.id.truthButton)
@@ -36,7 +40,7 @@ class GameActivity : AppCompatActivity() {
 
         mode = intent.getStringExtra("mode") ?: "friends"
 
-        if (friendsQuestions.isEmpty() || friendsActions.isEmpty() || romanticQuestions.isEmpty() || romanticActions.isEmpty()) {
+        if (friendsQuestions.isEmpty() || friendsActions.isEmpty() || romanticQuestions.isEmpty() || romanticActions.isEmpty() || hotQuestions.isEmpty() || hotActions.isEmpty()) {
             contentTextView.text = "Ошибка загрузки вопросов"
             truthButton.isEnabled = false
             actionButton.isEnabled = false
@@ -66,8 +70,10 @@ class GameActivity : AppCompatActivity() {
     private fun showRandomQuestion() {
         val questions = if (mode == "friends") {
             friendsQuestions
-        } else {
+        } else if (mode == "romantic") {
             friendsQuestions + romanticQuestions
+        } else {
+            hotQuestions
         }
 
         val randomQuestion = questions.random()
@@ -76,7 +82,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun showRandomAction() {
-        val actions = if (mode == "friends") friendsActions + bothActions else romanticActions + bothActions
+        val actions = if (mode == "friends") friendsActions + bothActions else if (mode == "romantic") romanticActions + bothActions else hotActions
         val randomAction = actions.random()
         contentTextView.text = randomAction
         showNextButton()

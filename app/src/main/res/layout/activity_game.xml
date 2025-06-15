@@ -20,16 +20,16 @@
     <Button
         android:id="@+id/truthButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="Правда"
         android:background="#FFC5C5"
         android:visibility="gone"/>
 
     <Button
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:id="@+id/actionButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="Действие"
         android:background="#FFC5C5"
         android:visibility="gone"
@@ -40,7 +40,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="➡️"
-        android:textSize="34sp"
+        android:textSize="51sp"
         android:layout_gravity="center_horizontal"
         android:background="@android:color/transparent"
         android:layout_marginTop="16dp"
