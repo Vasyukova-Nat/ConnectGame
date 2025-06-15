@@ -32,7 +32,8 @@
         android:layout_height="wrap_content"
         android:text="Действие"
         android:background="#FFC5C5"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:layout_marginBottom="40dp"/>
 
     <Button
         android:id="@+id/nextButton"
@@ -42,6 +43,7 @@
         android:textSize="34sp"
         android:layout_gravity="center_horizontal"
         android:background="@android:color/transparent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="40dp"/>
 
 </LinearLayout>
