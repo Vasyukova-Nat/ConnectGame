@@ -1,10 +1,14 @@
 package com.example.connectgame
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputEditText
 
 class GameActivity : AppCompatActivity() {
     private lateinit var contentTextView: TextView
@@ -20,6 +24,9 @@ class GameActivity : AppCompatActivity() {
     private lateinit var bothActions: List<String>
     private lateinit var hotQuestions: List<String>
     private lateinit var hotActions: List<String>
+
+    private var currentPlayer = 1
+    private lateinit var playerNames: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,13 +47,37 @@ class GameActivity : AppCompatActivity() {
 
         mode = intent.getStringExtra("mode") ?: "friends"
 
-        if (friendsQuestions.isEmpty() || friendsActions.isEmpty() || romanticQuestions.isEmpty() || romanticActions.isEmpty() || hotQuestions.isEmpty() || hotActions.isEmpty()) {
-            contentTextView.text = "Ошибка загрузки вопросов"
-            truthButton.isEnabled = false
-            actionButton.isEnabled = false
-            nextButton.isEnabled = false
-            return
+        showPlayerNamesDialog()
+    }
+
+    private fun showPlayerNamesDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.player_names, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
+            val player1 = dialogView.findViewById<TextInputEditText>(R.id.player1Input).text.toString()
+            val player2 = dialogView.findViewById<TextInputEditText>(R.id.player2Input).text.toString()
+
+            if (player1.isNotBlank() && player2.isNotBlank()) {
+                playerNames = listOf(player1, player2)
+                dialog.dismiss()
+                initUI()
+            } else {
+                Toast.makeText(this, "Введите имена обоих игроков", Toast.LENGTH_SHORT).show()
+            }
         }
+
+        dialog.show()
+    }
+
+    private fun initUI() {
+        contentTextView = findViewById(R.id.contentTextView)
+        truthButton = findViewById(R.id.truthButton)
+        actionButton = findViewById(R.id.actionButton)
+        nextButton = findViewById(R.id.nextButton)
 
         setupUI()
     }
@@ -55,11 +86,16 @@ class GameActivity : AppCompatActivity() {
         truthButton.visibility = View.VISIBLE
         actionButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
+
+        // Установка начального текста с текущим игроком
+        contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
+
         truthButton.setOnClickListener {
             showRandomQuestion()
             truthButton.visibility = View.GONE
             actionButton.visibility = View.GONE
         }
+
         actionButton.setOnClickListener {
             showRandomAction()
             truthButton.visibility = View.GONE
@@ -68,35 +104,48 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun showRandomQuestion() {
-        val questions = if (mode == "friends") {
-            friendsQuestions
-        } else if (mode == "romantic") {
-            friendsQuestions + romanticQuestions
-        } else {
-            hotQuestions
+        val questions = when (mode) {
+            "friends" -> friendsQuestions
+            "romantic" -> friendsQuestions + romanticQuestions
+            else -> hotQuestions
         }
 
         val randomQuestion = questions.random()
-        contentTextView.text = randomQuestion
+        contentTextView.text = "${playerNames[currentPlayer-1]}, $randomQuestion"
         showNextButton()
     }
 
     private fun showRandomAction() {
-        val actions = if (mode == "friends") friendsActions + bothActions else if (mode == "romantic") romanticActions + bothActions else hotActions
+        val actions = when (mode) {
+            "friends" -> friendsActions + bothActions
+            "romantic" -> romanticActions + bothActions
+            else -> hotActions
+        }
+
         val randomAction = actions.random()
-        contentTextView.text = randomAction
+        contentTextView.text = "${playerNames[currentPlayer-1]}, $randomAction"
         showNextButton()
     }
 
     private fun showNextButton() {
         nextButton.visibility = View.VISIBLE
-        nextButton.setOnClickListener { resetChoiceButtons() }
+        nextButton.setOnClickListener {
+            switchToNextPlayer()
+        }
     }
 
-    private fun resetChoiceButtons() {
-        contentTextView.text = "Выберите"
+    private fun switchToNextPlayer() {
+        currentPlayer = if (currentPlayer == 1) 2 else 1
+        contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
         truthButton.visibility = View.VISIBLE
         actionButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
+    }
+
+    private fun showError(message: String) {
+        contentTextView.text = message
+        findViewById<Button>(R.id.truthButton).isEnabled = false
+        findViewById<Button>(R.id.actionButton).isEnabled = false
+        findViewById<Button>(R.id.nextButton).isEnabled = false
     }
 }
