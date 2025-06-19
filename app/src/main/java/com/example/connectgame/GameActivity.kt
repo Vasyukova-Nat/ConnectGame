@@ -66,7 +66,7 @@ class GameActivity : AppCompatActivity() {
                 dialog.dismiss()
                 initUI()
             } else {
-                Toast.makeText(this, "Введите имена обоих игроков", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Введите имена игроков", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -87,7 +87,6 @@ class GameActivity : AppCompatActivity() {
         actionButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
 
-        // Установка начального текста с текущим игроком
         contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
 
         truthButton.setOnClickListener {
@@ -111,7 +110,7 @@ class GameActivity : AppCompatActivity() {
         }
 
         val randomQuestion = questions.random()
-        contentTextView.text = "${playerNames[currentPlayer-1]}, $randomQuestion"
+        contentTextView.text = randomQuestion
         showNextButton()
     }
 
@@ -123,7 +122,7 @@ class GameActivity : AppCompatActivity() {
         }
 
         val randomAction = actions.random()
-        contentTextView.text = "${playerNames[currentPlayer-1]}, $randomAction"
+        contentTextView.text = randomAction
         showNextButton()
     }
 
