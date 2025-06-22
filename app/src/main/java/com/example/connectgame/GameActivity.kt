@@ -28,6 +28,14 @@ class GameActivity : AppCompatActivity() {
     private var currentPlayer = 1
     private lateinit var playerNames: List<String>
 
+    private val usedQuestionsPlayer1 = mutableSetOf<String>()
+    private val usedQuestionsPlayer2 = mutableSetOf<String>()
+    private val usedActionsPlayer1 = mutableSetOf<String>()
+    private val usedActionsPlayer2 = mutableSetOf<String>()
+
+    private lateinit var allQuestions: List<String>
+    private lateinit var allActions: List<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
@@ -40,12 +48,24 @@ class GameActivity : AppCompatActivity() {
         hotQuestions = AssetReader.readLinesFromAsset(this, "hot_questions.txt")
         hotActions = AssetReader.readLinesFromAsset(this, "hot_actions.txt")
 
+        mode = intent.getStringExtra("mode") ?: "friends"
+
+        allQuestions = when (mode) {
+            "friends" -> friendsQuestions
+            "romantic" -> friendsQuestions + romanticQuestions
+            else -> hotQuestions
+        }
+
+        allActions = when (mode) {
+            "friends" -> friendsActions + bothActions
+            "romantic" -> romanticActions + bothActions
+            else -> hotActions
+        }
+
         contentTextView = findViewById(R.id.contentTextView)
         truthButton = findViewById(R.id.truthButton)
         actionButton = findViewById(R.id.actionButton)
         nextButton = findViewById(R.id.nextButton)
-
-        mode = intent.getStringExtra("mode") ?: "friends"
 
         showPlayerNamesDialog()
     }
@@ -103,26 +123,46 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun showRandomQuestion() {
-        val questions = when (mode) {
-            "friends" -> friendsQuestions
-            "romantic" -> friendsQuestions + romanticQuestions
-            else -> hotQuestions
+        val currentUsedQuestions = if (currentPlayer == 1) usedQuestionsPlayer1 else usedQuestionsPlayer2
+        val availableQuestions = allQuestions.filter { it !in currentUsedQuestions }
+
+        if (availableQuestions.isEmpty()) {
+            contentTextView.text = "${playerNames[currentPlayer-1]}, вопросы закончились!"
+            nextButton.visibility = View.VISIBLE
+            return
         }
 
-        val randomQuestion = questions.random()
+        val randomQuestion = availableQuestions.random()
         contentTextView.text = randomQuestion
+
+        if (currentPlayer == 1) {
+            usedQuestionsPlayer1.add(randomQuestion)
+        } else {
+            usedQuestionsPlayer2.add(randomQuestion)
+        }
+
         showNextButton()
     }
 
     private fun showRandomAction() {
-        val actions = when (mode) {
-            "friends" -> friendsActions + bothActions
-            "romantic" -> romanticActions + bothActions
-            else -> hotActions
+        val currentUsedActions = if (currentPlayer == 1) usedActionsPlayer1 else usedActionsPlayer2
+        val availableActions = allActions.filter { it !in currentUsedActions }
+
+        if (availableActions.isEmpty()) {
+            contentTextView.text = "${playerNames[currentPlayer-1]}, действия закончились!"
+            nextButton.visibility = View.VISIBLE
+            return
         }
 
-        val randomAction = actions.random()
+        val randomAction = availableActions.random()
         contentTextView.text = randomAction
+
+        if (currentPlayer == 1) {
+            usedActionsPlayer1.add(randomAction)
+        } else {
+            usedActionsPlayer2.add(randomAction)
+        }
+
         showNextButton()
     }
 
@@ -139,12 +179,5 @@ class GameActivity : AppCompatActivity() {
         truthButton.visibility = View.VISIBLE
         actionButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
-    }
-
-    private fun showError(message: String) {
-        contentTextView.text = message
-        findViewById<Button>(R.id.truthButton).isEnabled = false
-        findViewById<Button>(R.id.actionButton).isEnabled = false
-        findViewById<Button>(R.id.nextButton).isEnabled = false
     }
 }
