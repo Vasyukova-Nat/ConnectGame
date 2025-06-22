@@ -17,7 +17,7 @@ class GameActivity : AppCompatActivity() {
     private lateinit var nextButton: Button
     private lateinit var mode: String
 
-    private lateinit var friendsQuestions: List<String>
+    private lateinit var bothQuestions: List<String>
     private lateinit var friendsActions: List<String>
     private lateinit var romanticQuestions: List<String>
     private lateinit var romanticActions: List<String>
@@ -40,7 +40,7 @@ class GameActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        friendsQuestions = AssetReader.readLinesFromAsset(this, "friends_questions.txt")
+        bothQuestions = AssetReader.readLinesFromAsset(this, "both_questions.txt")
         friendsActions = AssetReader.readLinesFromAsset(this, "friends_actions.txt")
         romanticQuestions = AssetReader.readLinesFromAsset(this, "romantic_questions.txt")
         romanticActions = AssetReader.readLinesFromAsset(this, "romantic_actions.txt")
@@ -51,8 +51,8 @@ class GameActivity : AppCompatActivity() {
         mode = intent.getStringExtra("mode") ?: "friends"
 
         allQuestions = when (mode) {
-            "friends" -> friendsQuestions
-            "romantic" -> friendsQuestions + romanticQuestions
+            "friends" -> bothQuestions
+            "romantic" -> bothQuestions + romanticQuestions
             else -> hotQuestions
         }
 
