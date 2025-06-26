@@ -32,8 +32,18 @@
         android:layout_height="56dp"
         android:text="Действие"
         android:background="#FFC5C5"
+        android:visibility="gone"/>
+
+    <Button
+        android:layout_marginTop="16dp"
+        android:id="@+id/randomChoiceButton"
+        android:layout_width="160dp"
+        android:layout_height="56dp"
+        android:text="Случайный выбор"
+        android:background="#FFC5C5"
         android:visibility="gone"
-        android:layout_marginBottom="40dp"/>
+        android:layout_marginBottom="40dp"
+        android:layout_gravity="center"/>
 
     <Button
         android:id="@+id/nextButton"

@@ -14,6 +14,7 @@ class GameActivity : AppCompatActivity() {
     private lateinit var contentTextView: TextView
     private lateinit var truthButton: Button
     private lateinit var actionButton: Button
+    private lateinit var randomChoiceButton: Button
     private lateinit var nextButton: Button
     private lateinit var mode: String
 
@@ -65,6 +66,7 @@ class GameActivity : AppCompatActivity() {
         contentTextView = findViewById(R.id.contentTextView)
         truthButton = findViewById(R.id.truthButton)
         actionButton = findViewById(R.id.actionButton)
+        randomChoiceButton = findViewById(R.id.randomChoiceButton)
         nextButton = findViewById(R.id.nextButton)
 
         showPlayerNamesDialog()
@@ -97,6 +99,7 @@ class GameActivity : AppCompatActivity() {
         contentTextView = findViewById(R.id.contentTextView)
         truthButton = findViewById(R.id.truthButton)
         actionButton = findViewById(R.id.actionButton)
+        randomChoiceButton = findViewById(R.id.randomChoiceButton)
         nextButton = findViewById(R.id.nextButton)
 
         setupUI()
@@ -105,6 +108,7 @@ class GameActivity : AppCompatActivity() {
     private fun setupUI() {
         truthButton.visibility = View.VISIBLE
         actionButton.visibility = View.VISIBLE
+        randomChoiceButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
 
         contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
@@ -113,12 +117,26 @@ class GameActivity : AppCompatActivity() {
             showRandomQuestion()
             truthButton.visibility = View.GONE
             actionButton.visibility = View.GONE
+            randomChoiceButton.visibility = View.GONE
         }
 
         actionButton.setOnClickListener {
             showRandomAction()
             truthButton.visibility = View.GONE
             actionButton.visibility = View.GONE
+            randomChoiceButton.visibility = View.GONE
+        }
+
+        randomChoiceButton.setOnClickListener {
+            val randomNum = (0..1).random()
+            if (randomNum == 0) {
+                showRandomQuestion()
+            } else {
+                showRandomAction()
+            }
+            truthButton.visibility = View.GONE
+            actionButton.visibility = View.GONE
+            randomChoiceButton.visibility = View.GONE
         }
     }
 
@@ -178,6 +196,7 @@ class GameActivity : AppCompatActivity() {
         contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
         truthButton.visibility = View.VISIBLE
         actionButton.visibility = View.VISIBLE
+        randomChoiceButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
     }
 }
