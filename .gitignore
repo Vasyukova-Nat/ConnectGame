@@ -1,4 +1,5 @@
 app/src/main/assets/drafts/**
+app/src/main/assets/Оригинальные и полные списки/**
 *.iml
 .gradle
 /local.properties
