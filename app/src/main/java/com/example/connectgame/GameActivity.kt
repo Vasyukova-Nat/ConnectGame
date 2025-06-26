@@ -110,16 +110,15 @@ class GameActivity : AppCompatActivity() {
             .create()
 
         dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
-            val player1 = dialogView.findViewById<TextInputEditText>(R.id.player1Input).text.toString()
-            val player2 = dialogView.findViewById<TextInputEditText>(R.id.player2Input).text.toString()
+            val player1Input = dialogView.findViewById<TextInputEditText>(R.id.player1Input)
+            val player2Input = dialogView.findViewById<TextInputEditText>(R.id.player2Input)
 
-            if (player1.isNotBlank() && player2.isNotBlank()) {
-                playerNames = listOf(player1, player2)
-                dialog.dismiss()
-                initUI()
-            } else {
-                Toast.makeText(this, "Введите имена игроков", Toast.LENGTH_SHORT).show()
-            }
+            val player1 = player1Input.text?.toString()?.takeIf { it.isNotBlank() } ?: "1"
+            val player2 = player2Input.text?.toString()?.takeIf { it.isNotBlank() } ?: "2"
+
+            playerNames = listOf(player1, player2)
+            dialog.dismiss()
+            initUI()
         }
 
         dialog.show()
@@ -141,7 +140,7 @@ class GameActivity : AppCompatActivity() {
         randomChoiceButton.visibility = View.VISIBLE
         nextButton.visibility = View.GONE
 
-        contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
+        contentTextView.text = "Ход игрока ${playerNames[currentPlayer-1]}. Выберите:"
 
         truthButton.setOnClickListener {
             showRandomQuestion()
@@ -223,7 +222,7 @@ class GameActivity : AppCompatActivity() {
 
     private fun switchToNextPlayer() {
         currentPlayer = if (currentPlayer == 1) 2 else 1
-        contentTextView.text = "Ход ${playerNames[currentPlayer-1]}. Выберите:"
+        contentTextView.text = "Ход игрока ${playerNames[currentPlayer-1]}. Выберите:"
         truthButton.visibility = View.VISIBLE
         actionButton.visibility = View.VISIBLE
         randomChoiceButton.visibility = View.VISIBLE
