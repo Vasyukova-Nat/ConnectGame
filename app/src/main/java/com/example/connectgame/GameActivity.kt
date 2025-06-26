@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 
 class GameActivity : AppCompatActivity() {
@@ -38,8 +40,19 @@ class GameActivity : AppCompatActivity() {
     private lateinit var allActions: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        mode = intent.getStringExtra("mode") ?: "friends"
+        if (mode == "hot") {
+            setTheme(R.style.Theme_ConnectGame_Hot)
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
+
+        contentTextView = findViewById(R.id.contentTextView)
+        truthButton = findViewById(R.id.truthButton)
+        actionButton = findViewById(R.id.actionButton)
+        randomChoiceButton = findViewById(R.id.randomChoiceButton)
+        nextButton = findViewById(R.id.nextButton)
 
         bothQuestions = AssetReader.readLinesFromAsset(this, "both_questions.txt")
         friendsActions = AssetReader.readLinesFromAsset(this, "friends_actions.txt")
@@ -48,8 +61,6 @@ class GameActivity : AppCompatActivity() {
         bothActions = AssetReader.readLinesFromAsset(this, "both_actions.txt")
         hotQuestions = AssetReader.readLinesFromAsset(this, "hot_questions.txt")
         hotActions = AssetReader.readLinesFromAsset(this, "hot_actions.txt")
-
-        mode = intent.getStringExtra("mode") ?: "friends"
 
         allQuestions = when (mode) {
             "friends" -> bothQuestions
@@ -63,13 +74,32 @@ class GameActivity : AppCompatActivity() {
             else -> hotActions
         }
 
-        contentTextView = findViewById(R.id.contentTextView)
-        truthButton = findViewById(R.id.truthButton)
-        actionButton = findViewById(R.id.actionButton)
-        randomChoiceButton = findViewById(R.id.randomChoiceButton)
-        nextButton = findViewById(R.id.nextButton)
+        if (mode == "hot") {
+            applyHotThemeColors()
+        }
 
         showPlayerNamesDialog()
+    }
+
+    private fun applyHotThemeColors() {
+        if (!::contentTextView.isInitialized || !::truthButton.isInitialized ||
+            !::actionButton.isInitialized || !::randomChoiceButton.isInitialized) {
+            return
+        }
+
+        val rootView = findViewById<LinearLayout>(R.id.rootLayout)
+        val hotBackground = ContextCompat.getColor(this, R.color.background_dark)
+        val hotButton = ContextCompat.getColor(this, R.color.button_dark)
+        val hotText = ContextCompat.getColor(this, R.color.text_dark)
+
+        rootView.setBackgroundColor(hotBackground)
+        contentTextView.setTextColor(hotText)
+        truthButton.setBackgroundColor(hotButton)
+        truthButton.setTextColor(hotText)
+        actionButton.setBackgroundColor(hotButton)
+        actionButton.setTextColor(hotText)
+        randomChoiceButton.setBackgroundColor(hotButton)
+        randomChoiceButton.setTextColor(hotText)
     }
 
     private fun showPlayerNamesDialog() {
