@@ -40,7 +40,7 @@
     <Button
         android:layout_marginTop="16dp"
         android:id="@+id/randomChoiceButton"
-        android:layout_width="160dp"
+        android:layout_width="180dp"
         android:layout_height="56dp"
         android:text="Случайный выбор"
         android:background="@color/button_light"

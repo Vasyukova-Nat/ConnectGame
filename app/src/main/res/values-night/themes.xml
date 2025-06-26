@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.ConnectGame.Hot" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="colorPrimary">@color/background_dark</item>
+<!--        <item name="colorPrimary">@color/background_dark</item>-->
+<!--        <item name="colorOnPrimary">@color/text_dark</item>-->
+<!--        <item name="android:windowLightStatusBar">false</item>-->
+
+        <item name="colorPrimary">@color/button_dark</item>
         <item name="colorOnPrimary">@color/text_dark</item>
+        <item name="colorSurface">@color/background_dark</item>
         <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>
+
