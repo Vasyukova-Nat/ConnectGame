@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
+import java.io.File
 
 class GameActivity : AppCompatActivity() {
     private lateinit var contentTextView: TextView
@@ -29,11 +30,7 @@ class GameActivity : AppCompatActivity() {
 
     private var currentPlayer = 1
     private lateinit var playerNames: List<String>
-
-    private val usedQuestionsPlayer1 = mutableSetOf<String>()
-    private val usedQuestionsPlayer2 = mutableSetOf<String>()
-    private val usedActionsPlayer1 = mutableSetOf<String>()
-    private val usedActionsPlayer2 = mutableSetOf<String>()
+    private lateinit var currentPairFolder: File
 
     private lateinit var allQuestions: List<String>
     private lateinit var allActions: List<String>
@@ -109,27 +106,60 @@ class GameActivity : AppCompatActivity() {
             .create()
 
         dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
-            val player1Input = dialogView.findViewById<TextInputEditText>(R.id.player1Input)
-            val player2Input = dialogView.findViewById<TextInputEditText>(R.id.player2Input)
-
-            val player1 = player1Input.text?.toString()?.takeIf { it.isNotBlank() } ?: "1"
-            val player2 = player2Input.text?.toString()?.takeIf { it.isNotBlank() } ?: "2"
+            val player1 = dialogView.findViewById<TextInputEditText>(R.id.player1Input).text?.toString()?.trim()?.takeIf { it.isNotBlank() } ?: "1"
+            val player2 = dialogView.findViewById<TextInputEditText>(R.id.player2Input).text?.toString()?.trim()?.takeIf { it.isNotBlank() } ?: "2"
 
             playerNames = listOf(player1, player2)
+            setupPairStorage(player1, player2)
             dialog.dismiss()
             initUI()
         }
-
         dialog.show()
     }
 
-    private fun initUI() {
-        contentTextView = findViewById(R.id.contentTextView)
-        truthButton = findViewById(R.id.truthButton)
-        actionButton = findViewById(R.id.actionButton)
-        randomChoiceButton = findViewById(R.id.randomChoiceButton)
-        nextButton = findViewById(R.id.nextButton)
+    private fun setupPairStorage(player1: String, player2: String) {
+        val pairsFolder = File(filesDir, "pairs")
+        if (!pairsFolder.exists()) pairsFolder.mkdirs()
 
+        val pairFolderName = "${player1}-${player2}".replace(" ", "_")
+        val pairFolder = File(pairsFolder, pairFolderName)
+        if (!pairFolder.exists()) pairFolder.mkdirs()
+
+        val modeFolder = File(pairFolder, mode)
+        if (!modeFolder.exists()) modeFolder.mkdirs()
+
+        currentPairFolder = modeFolder
+    }
+
+    private fun getUsedQuestionsFile(playerName: String): File {
+        return File(currentPairFolder, "${playerName}_used_questions_${mode.lowercase()}.txt")
+    }
+
+    private fun getUsedActionsFile(playerName: String): File {
+        return File(currentPairFolder, "${playerName}_used_actions_${mode.lowercase()}.txt")
+    }
+
+    private fun loadUsedQuestions(playerName: String): Set<String> {
+        val file = getUsedQuestionsFile(playerName)
+        return if (file.exists()) file.readLines().toSet() else emptySet()
+    }
+
+    private fun loadUsedActions(playerName: String): Set<String> {
+        val file = getUsedActionsFile(playerName)
+        return if (file.exists()) file.readLines().toSet() else emptySet()
+    }
+
+    private fun saveUsedQuestion(playerName: String, question: String) {
+        val file = getUsedQuestionsFile(playerName)
+        file.appendText("$question\n")
+    }
+
+    private fun saveUsedAction(playerName: String, action: String) {
+        val file = getUsedActionsFile(playerName)
+        file.appendText("$action\n")
+    }
+
+    private fun initUI() {
         setupUI()
     }
 
@@ -156,12 +186,7 @@ class GameActivity : AppCompatActivity() {
         }
 
         randomChoiceButton.setOnClickListener {
-            val randomNum = (0..1).random()
-            if (randomNum == 0) {
-                showRandomQuestion()
-            } else {
-                showRandomAction()
-            }
+            if ((0..1).random() == 0) showRandomQuestion() else showRandomAction()
             truthButton.visibility = View.GONE
             actionButton.visibility = View.GONE
             randomChoiceButton.visibility = View.GONE
@@ -169,46 +194,36 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun showRandomQuestion() {
-        val currentUsedQuestions = if (currentPlayer == 1) usedQuestionsPlayer1 else usedQuestionsPlayer2
-        val availableQuestions = allQuestions.filter { it !in currentUsedQuestions }
+        val currentPlayerName = playerNames[currentPlayer-1]
+        val usedQuestions = loadUsedQuestions(currentPlayerName)
+        val availableQuestions = allQuestions.filter { it !in usedQuestions }
 
         if (availableQuestions.isEmpty()) {
-            contentTextView.text = "${playerNames[currentPlayer-1]}, вопросы закончились!"
+            contentTextView.text = "$currentPlayerName, вопросы закончились!"
             nextButton.visibility = View.VISIBLE
             return
         }
 
         val randomQuestion = availableQuestions.random()
         contentTextView.text = randomQuestion
-
-        if (currentPlayer == 1) {
-            usedQuestionsPlayer1.add(randomQuestion)
-        } else {
-            usedQuestionsPlayer2.add(randomQuestion)
-        }
-
+        saveUsedQuestion(currentPlayerName, randomQuestion)
         showNextButton()
     }
 
     private fun showRandomAction() {
-        val currentUsedActions = if (currentPlayer == 1) usedActionsPlayer1 else usedActionsPlayer2
-        val availableActions = allActions.filter { it !in currentUsedActions }
+        val currentPlayerName = playerNames[currentPlayer-1]
+        val usedActions = loadUsedActions(currentPlayerName)
+        val availableActions = allActions.filter { it !in usedActions }
 
         if (availableActions.isEmpty()) {
-            contentTextView.text = "${playerNames[currentPlayer-1]}, действия закончились!"
+            contentTextView.text = "$currentPlayerName, действия закончились!"
             nextButton.visibility = View.VISIBLE
             return
         }
 
         val randomAction = availableActions.random()
         contentTextView.text = randomAction
-
-        if (currentPlayer == 1) {
-            usedActionsPlayer1.add(randomAction)
-        } else {
-            usedActionsPlayer2.add(randomAction)
-        }
-
+        saveUsedAction(currentPlayerName, randomAction)
         showNextButton()
     }
 

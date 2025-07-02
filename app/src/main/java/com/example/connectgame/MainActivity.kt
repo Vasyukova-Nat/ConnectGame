@@ -3,12 +3,23 @@ package com.example.connectgame
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var profilesButton: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        profilesButton = findViewById(R.id.profilesButton)
+        profilesButton.setOnClickListener { showProfilesDialog() }
 
         val friendsButton = findViewById<Button>(R.id.friendsButton)
         val romanticButton = findViewById<Button>(R.id.romanticButton)
@@ -30,6 +41,76 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, GameActivity::class.java)
             intent.putExtra("mode", "hot")
             startActivity(intent)
+        }
+    }
+
+    private fun showProfilesDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.profiles, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        val pairs = getSavedPairs()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, pairs)
+        dialogView.findViewById<Spinner>(R.id.profilesSpinner).adapter = adapter
+
+        dialogView.findViewById<Button>(R.id.viewProfileButton).setOnClickListener {
+            val selectedPair = pairs[dialogView.findViewById<Spinner>(R.id.profilesSpinner).selectedItemPosition]
+            showPairHistory(selectedPair)
+        }
+
+        dialogView.findViewById<Button>(R.id.deleteProfileButton).setOnClickListener {
+            val selectedPair = pairs[dialogView.findViewById<Spinner>(R.id.profilesSpinner).selectedItemPosition]
+            confirmDeleteProfile(selectedPair, dialog)
+        }
+
+        dialog.show()
+    }
+
+    private fun getSavedPairs(): List<String> {
+        val pairsDir = File(filesDir, "pairs")
+        return if (pairsDir.exists() && pairsDir.isDirectory) {
+            pairsDir.list()?.toList() ?: emptyList()
+        } else {
+            emptyList()
+        }
+    }
+
+    private fun showPairHistory(pairName: String) {
+        val pairDir = File(File(filesDir, "pairs"), pairName)
+        val history = StringBuilder("Пара: $pairName\n\n")
+
+        pairDir.walk().filter { it.isFile }.forEach { file ->
+            history.append("${file.name}:\n")
+            history.append(file.readText())
+            history.append("\n\n")
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Список сыгранных вопросов")
+            .setMessage(if (history.isNotEmpty()) history.toString() else "Нет данных")
+            .setPositiveButton("OK", null)
+            .show()
+    }
+
+    private fun confirmDeleteProfile(pairName: String, parentDialog: AlertDialog) {
+        AlertDialog.Builder(this)
+            .setTitle("Подтверждение")
+            .setMessage("Удалить все данные пары '$pairName'? Это действие нельзя отменить!")
+            .setPositiveButton("Удалить") { _, _ ->
+                deleteProfile(pairName)
+                parentDialog.dismiss()
+                Toast.makeText(this, "Профиль '$pairName' удален", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
+    private fun deleteProfile(pairName: String) {
+        val pairDir = File(File(filesDir, "pairs"), pairName)
+        if (pairDir.exists()) {
+            pairDir.deleteRecursively()
         }
     }
 }

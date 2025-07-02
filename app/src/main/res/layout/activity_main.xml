@@ -1,46 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:padding="16dp"
     tools:context=".MainActivity"
     android:background="#FFEBEE">
 
-    <TextView
+    <Button
+        android:id="@+id/profilesButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Есть коннект!"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+        android:layout_margin="16dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:background="@android:color/transparent"
+        android:text="👥"
+        android:textSize="40sp" />
 
-    <Button
-        android:id="@+id/friendsButton"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Для друзей"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#4CAF50"
-        android:textColor="#FFFFFF"/>
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/romanticButton"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Для романтического знакомства"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#E93A74"
-        android:textColor="#FFFFFF"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="Есть коннект!"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/hotButton"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:text="Hot"
-        android:backgroundTint="#F8003E"
-        android:textColor="#FFFFFF"/>
+        <Button
+            android:id="@+id/friendsButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#4CAF50"
+            android:text="Для друзей"
+            android:textColor="#FFFFFF" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/romanticButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#E93A74"
+            android:text="Для романтического знакомства"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/hotButton"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:backgroundTint="#F8003E"
+            android:text="Hot"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</RelativeLayout>
