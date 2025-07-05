@@ -57,7 +57,8 @@ class MainActivity : AppCompatActivity() {
 
         dialogView.findViewById<Button>(R.id.viewProfileButton).setOnClickListener {
             val selectedPair = pairs[dialogView.findViewById<Spinner>(R.id.profilesSpinner).selectedItemPosition]
-            showPairHistory(selectedPair)
+            openProfileHistory(selectedPair)
+            dialog.dismiss()
         }
 
         dialogView.findViewById<Button>(R.id.deleteProfileButton).setOnClickListener {
@@ -68,6 +69,13 @@ class MainActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun openProfileHistory(pairName: String) {
+        val intent = Intent(this, ProfileHistoryActivity::class.java).apply {
+            putExtra(ProfileHistoryActivity.EXTRA_PAIR_NAME, pairName)
+        }
+        startActivity(intent)
+    }
+
     private fun getSavedPairs(): List<String> {
         val pairsDir = File(filesDir, "pairs")
         return if (pairsDir.exists() && pairsDir.isDirectory) {
@@ -75,23 +83,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             emptyList()
         }
-    }
-
-    private fun showPairHistory(pairName: String) {
-        val pairDir = File(File(filesDir, "pairs"), pairName)
-        val history = StringBuilder("Пара: $pairName\n\n")
-
-        pairDir.walk().filter { it.isFile }.forEach { file ->
-            history.append("${file.name}:\n")
-            history.append(file.readText())
-            history.append("\n\n")
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("Список сыгранных вопросов")
-            .setMessage(if (history.isNotEmpty()) history.toString() else "Нет данных")
-            .setPositiveButton("OK", null)
-            .show()
     }
 
     private fun confirmDeleteProfile(pairName: String, parentDialog: AlertDialog) {
