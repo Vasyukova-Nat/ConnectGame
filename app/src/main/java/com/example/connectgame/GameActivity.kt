@@ -122,41 +122,83 @@ class GameActivity : AppCompatActivity() {
         if (!pairsFolder.exists()) pairsFolder.mkdirs()
 
         val pairFolderName = "${player1}-${player2}".replace(" ", "_")
-        val pairFolder = File(pairsFolder, pairFolderName)
-        if (!pairFolder.exists()) pairFolder.mkdirs()
-
-        val modeFolder = File(pairFolder, mode)
-        if (!modeFolder.exists()) modeFolder.mkdirs()
-
-        currentPairFolder = modeFolder
+        currentPairFolder = File(pairsFolder, pairFolderName)
+        if (!currentPairFolder.exists()) currentPairFolder.mkdirs()
     }
 
-    private fun getUsedQuestionsFile(playerName: String): File {
-        return File(currentPairFolder, "${playerName}_used_questions_${mode.lowercase()}.txt")
+    private fun getUsedQuestionsFile(playerName: String, source: String): File {
+        return File(currentPairFolder, "${playerName}_used_${source}_questions.txt")
     }
 
-    private fun getUsedActionsFile(playerName: String): File {
-        return File(currentPairFolder, "${playerName}_used_actions_${mode.lowercase()}.txt")
+    private fun getUsedActionsFile(playerName: String, source: String): File {
+        return File(currentPairFolder, "${playerName}_used_${source}_actions.txt")
     }
 
     private fun loadUsedQuestions(playerName: String): Set<String> {
-        val file = getUsedQuestionsFile(playerName)
-        return if (file.exists()) file.readLines().toSet() else emptySet()
+        val usedQuestions = mutableSetOf<String>()
+
+        if (mode == "romantic") {
+            File(currentPairFolder, "${playerName}_used_both_questions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
+            File(currentPairFolder, "${playerName}_used_romantic_questions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
+        }
+        else if (mode == "friends") {
+            File(currentPairFolder, "${playerName}_used_both_questions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
+            File(currentPairFolder, "${playerName}_used_friends_questions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
+        }
+        else if (mode == "hot") {
+            File(currentPairFolder, "${playerName}_used_hot_questions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
+        }
+
+        return usedQuestions
     }
 
     private fun loadUsedActions(playerName: String): Set<String> {
-        val file = getUsedActionsFile(playerName)
-        return if (file.exists()) file.readLines().toSet() else emptySet()
+        val usedActions = mutableSetOf<String>()
+
+        if (mode == "romantic") {
+            File(currentPairFolder, "${playerName}_used_both_actions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
+            File(currentPairFolder, "${playerName}_used_romantic_actions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
+        }
+        else if (mode == "friends") {
+            File(currentPairFolder, "${playerName}_used_both_actions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
+            File(currentPairFolder, "${playerName}_used_friends_actions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
+        }
+        else if (mode == "hot") {
+            File(currentPairFolder, "${playerName}_used_hot_actions.txt")
+                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
+        }
+
+        return usedActions
     }
 
     private fun saveUsedQuestion(playerName: String, question: String) {
-        val file = getUsedQuestionsFile(playerName)
-        file.appendText("$question\n")
+        val source = when {
+            bothQuestions.contains(question) -> "both"
+            romanticQuestions.contains(question) -> "romantic"
+            hotQuestions.contains(question) -> "hot"
+            else -> return
+        }
+        getUsedQuestionsFile(playerName, source).appendText("$question\n")
     }
 
     private fun saveUsedAction(playerName: String, action: String) {
-        val file = getUsedActionsFile(playerName)
-        file.appendText("$action\n")
+        val source = when {
+            bothActions.contains(action) -> "both"
+            friendsActions.contains(action) -> "friends"
+            romanticActions.contains(action) -> "romantic"
+            hotActions.contains(action) -> "hot"
+            else -> return
+        }
+        getUsedActionsFile(playerName, source).appendText("$action\n")
     }
 
     private fun initUI() {
