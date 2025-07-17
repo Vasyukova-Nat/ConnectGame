@@ -8,21 +8,50 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end"
         android:padding="8dp">
 
-        <Button
-            android:id="@+id/editButton"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Редактировать"/>
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/saveButton"
+            <Button
+                android:id="@+id/exportButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Экспорт"/>
+
+            <Button
+                android:id="@+id/importButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Импорт" />
+        </LinearLayout>
+
+        <!-- Пространство между левой и правой группами -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Сохранить"
-            android:visibility="gone"/>
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/editButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Редактировать"/>
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Сохранить"
+                android:visibility="gone"/>
+        </LinearLayout>
     </LinearLayout>
 
     <ScrollView
