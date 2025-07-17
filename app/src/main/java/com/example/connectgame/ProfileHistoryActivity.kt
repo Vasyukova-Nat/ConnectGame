@@ -33,20 +33,6 @@ class ProfileHistoryActivity : AppCompatActivity() {
     private lateinit var historyContainer: LinearLayout
     private lateinit var pairName: String
     private lateinit var pairDir: File
-
-    private val questionFiles = listOf(
-        "both_questions.txt" to "Вопросы: оба (друзья+романтика)",
-        "romantic_questions.txt" to "Вопросы: романтика",
-        "hot_questions.txt" to "Вопросы: hot"
-    )
-
-    private val actionFiles = listOf(
-        "both_actions.txt" to "Действия: оба (друзья+романтика)",
-        "friends_actions.txt" to "Действия: друзья",
-        "romantic_actions.txt" to "Действия: романтика",
-        "hot_actions.txt" to "Действия: hot"
-    )
-
     private lateinit var playerNames: List<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,13 +76,18 @@ class ProfileHistoryActivity : AppCompatActivity() {
         saveButton.visibility = View.VISIBLE
         historyContainer.removeAllViews()
 
-        val allQuestions = questionFiles.associate { (fileName, _) ->
-            fileName to AssetReader.readLinesFromAsset(this, fileName)
-        }
+        val allQuestionsMap = mapOf(
+            "both_questions.txt" to AssetReader.readLinesFromAsset(this, "both_questions.txt"),
+            "romantic_questions.txt" to AssetReader.readLinesFromAsset(this, "romantic_questions.txt"),
+            "hot_questions.txt" to AssetReader.readLinesFromAsset(this, "hot_questions.txt")
+        )
 
-        val allActions = actionFiles.associate { (fileName, _) ->
-            fileName to AssetReader.readLinesFromAsset(this, fileName)
-        }
+        val allActionsMap = mapOf(
+            "friends_actions.txt" to AssetReader.readLinesFromAsset(this, "friends_actions.txt"),
+            "both_actions.txt" to AssetReader.readLinesFromAsset(this, "both_actions.txt"),
+            "romantic_actions.txt" to AssetReader.readLinesFromAsset(this, "romantic_actions.txt"),
+            "hot_actions.txt" to AssetReader.readLinesFromAsset(this, "hot_actions.txt")
+        )
 
         val usedItems = mutableMapOf<String, MutableMap<String, Set<String>>>()
 
@@ -114,11 +105,20 @@ class ProfileHistoryActivity : AppCompatActivity() {
             }
         }
 
-        questionFiles.forEach { (fileName, title) ->
-            val questions = allQuestions[fileName] ?: emptyList()
-            if (questions.isNotEmpty()) {
+        fun showItems(title: String, fileName: String, type: String) {
+            val items = if (type == "questions") allQuestionsMap[fileName] else allActionsMap[fileName]
+            if (!items.isNullOrEmpty()) {
                 val sectionHeader = TextView(this).apply {
-                    text = title
+                    text = when {
+                        fileName == "friends_actions.txt" -> "Действия: друзья"
+                        fileName == "both_questions.txt" -> "Вопросы: оба (друзья+романтика)"
+                        fileName == "both_actions.txt" -> "Действия: оба (друзья+романтика)"
+                        fileName == "romantic_questions.txt" -> "Вопросы: романтика"
+                        fileName == "romantic_actions.txt" -> "Действия: романтика"
+                        fileName == "hot_questions.txt" -> "Вопросы: hot"
+                        fileName == "hot_actions.txt" -> "Действия: hot"
+                        else -> title
+                    }
                     textSize = 18f
                     setPadding(0, 24, 0, 8)
                 }
@@ -132,9 +132,9 @@ class ProfileHistoryActivity : AppCompatActivity() {
                     }
                     historyContainer.addView(playerHeader)
 
-                    val source = fileName.removeSuffix("_questions.txt")
-                    questions.forEach { question ->
-                        val isUsed = usedItems[player]?.get("$source|questions")?.contains(question) == true
+                    val source = fileName.removeSuffix("_${type}.txt")
+                    items.forEach { item ->
+                        val isUsed = usedItems[player]?.get("$source|$type")?.contains(item) == true
 
                         val checkBoxLayout = LinearLayout(this).apply {
                             orientation = LinearLayout.HORIZONTAL
@@ -143,68 +143,30 @@ class ProfileHistoryActivity : AppCompatActivity() {
 
                         val checkBox = CheckBox(this).apply {
                             isChecked = isUsed
-                            tag = "$player|$source|questions|$question"
+                            tag = "$player|$source|$type|$item"
                         }
 
-                        val questionView = TextView(this).apply {
-                            text = question
+                        val itemView = TextView(this).apply {
+                            text = item
                             textSize = 16f
                             setPadding(16, 0, 0, 0)
                         }
 
                         checkBoxLayout.addView(checkBox)
-                        checkBoxLayout.addView(questionView)
+                        checkBoxLayout.addView(itemView)
                         historyContainer.addView(checkBoxLayout)
                     }
                 }
             }
         }
 
-        actionFiles.forEach { (fileName, title) ->
-            val actions = allActions[fileName] ?: emptyList()
-            if (actions.isNotEmpty()) {
-                val sectionHeader = TextView(this).apply {
-                    text = title
-                    textSize = 18f
-                    setPadding(0, 24, 0, 8)
-                }
-                historyContainer.addView(sectionHeader)
-
-                playerNames.forEach { player ->
-                    val playerHeader = TextView(this).apply {
-                        text = "Игрок: $player"
-                        textSize = 16f
-                        setPadding(16, 8, 0, 8)
-                    }
-                    historyContainer.addView(playerHeader)
-
-                    val source = fileName.removeSuffix("_actions.txt")
-                    actions.forEach { action ->
-                        val isUsed = usedItems[player]?.get("$source|actions")?.contains(action) == true
-
-                        val checkBoxLayout = LinearLayout(this).apply {
-                            orientation = LinearLayout.HORIZONTAL
-                            setPadding(32, 4, 16, 4)
-                        }
-
-                        val checkBox = CheckBox(this).apply {
-                            isChecked = isUsed
-                            tag = "$player|$source|actions|$action"
-                        }
-
-                        val actionView = TextView(this).apply {
-                            text = action
-                            textSize = 16f
-                            setPadding(16, 0, 0, 0)
-                        }
-
-                        checkBoxLayout.addView(checkBox)
-                        checkBoxLayout.addView(actionView)
-                        historyContainer.addView(checkBoxLayout)
-                    }
-                }
-            }
-        }
+        showItems("", "friends_actions.txt", "actions")
+        showItems("", "both_questions.txt", "questions")
+        showItems("", "both_actions.txt", "actions")
+        showItems("", "romantic_questions.txt", "questions")
+        showItems("", "romantic_actions.txt", "actions")
+        showItems("", "hot_questions.txt", "questions")
+        showItems("", "hot_actions.txt", "actions")
     }
 
     private fun saveChanges() {
