@@ -19,6 +19,8 @@ class GameActivity : AppCompatActivity() {
     private lateinit var randomChoiceButton: Button
     private lateinit var nextButton: Button
     private lateinit var mode: String
+    private lateinit var playerNames: List<String>
+    private lateinit var currentPairFolder: File
 
     private lateinit var bothQuestions: List<String>
     private lateinit var friendsActions: List<String>
@@ -28,15 +30,15 @@ class GameActivity : AppCompatActivity() {
     private lateinit var hotQuestions: List<String>
     private lateinit var hotActions: List<String>
 
-    private var currentPlayer = 1
-    private lateinit var playerNames: List<String>
-    private lateinit var currentPairFolder: File
-
     private lateinit var allQuestions: List<String>
     private lateinit var allActions: List<String>
 
+    private var currentPlayer = 1
+
     override fun onCreate(savedInstanceState: Bundle?) {
         mode = intent.getStringExtra("mode") ?: "friends"
+        val pairName = intent.getStringExtra("pairName") ?: return
+
         if (mode == "hot") {
             setTheme(R.style.Theme_ConnectGame_Hot)
         }
@@ -49,6 +51,8 @@ class GameActivity : AppCompatActivity() {
         actionButton = findViewById(R.id.actionButton)
         randomChoiceButton = findViewById(R.id.randomChoiceButton)
         nextButton = findViewById(R.id.nextButton)
+
+        playerNames = pairName.split("-").map { it.replace("_", " ") }
 
         bothQuestions = AssetReader.readLinesFromAsset(this, "both_questions.txt")
         friendsActions = AssetReader.readLinesFromAsset(this, "friends_actions.txt")
@@ -74,7 +78,17 @@ class GameActivity : AppCompatActivity() {
             applyHotThemeColors()
         }
 
-        showPlayerNamesDialog()
+        setupPairStorage()
+        initUI()
+    }
+
+    private fun setupPairStorage() {
+        val pairName = intent.getStringExtra("pairName") ?: return
+        val pairsFolder = File(filesDir, "pairs")
+        if (!pairsFolder.exists()) pairsFolder.mkdirs()
+
+        currentPairFolder = File(pairsFolder, pairName)
+        if (!currentPairFolder.exists()) currentPairFolder.mkdirs()
     }
 
     private fun applyHotThemeColors() {
@@ -96,34 +110,6 @@ class GameActivity : AppCompatActivity() {
         actionButton.setTextColor(hotText)
         randomChoiceButton.setBackgroundColor(hotButton)
         randomChoiceButton.setTextColor(hotText)
-    }
-
-    private fun showPlayerNamesDialog() {
-        val dialogView = LayoutInflater.from(this).inflate(R.layout.player_names, null)
-        val dialog = AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .create()
-
-        dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
-            val player1 = dialogView.findViewById<TextInputEditText>(R.id.player1Input).text?.toString()?.trim()?.takeIf { it.isNotBlank() } ?: "1"
-            val player2 = dialogView.findViewById<TextInputEditText>(R.id.player2Input).text?.toString()?.trim()?.takeIf { it.isNotBlank() } ?: "2"
-
-            playerNames = listOf(player1, player2)
-            setupPairStorage(player1, player2)
-            dialog.dismiss()
-            initUI()
-        }
-        dialog.show()
-    }
-
-    private fun setupPairStorage(player1: String, player2: String) {
-        val pairsFolder = File(filesDir, "pairs")
-        if (!pairsFolder.exists()) pairsFolder.mkdirs()
-
-        val pairFolderName = "${player1}-${player2}".replace(" ", "_")
-        currentPairFolder = File(pairsFolder, pairFolderName)
-        if (!currentPairFolder.exists()) currentPairFolder.mkdirs()
     }
 
     private fun getUsedQuestionsFile(playerName: String, source: String): File {

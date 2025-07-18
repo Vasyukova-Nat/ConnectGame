@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.textfield.TextInputEditText
 import java.io.File
 
 class MainActivity : AppCompatActivity() {
@@ -26,22 +27,72 @@ class MainActivity : AppCompatActivity() {
         val hotButton = findViewById<Button>(R.id.hotButton)
 
         friendsButton.setOnClickListener {
-            val intent = Intent(this, GameActivity::class.java)
-            intent.putExtra("mode", "friends")
-            startActivity(intent)
+            showModeSelectionDialog("friends")
         }
 
         romanticButton.setOnClickListener {
-            val intent = Intent(this, GameActivity::class.java)
-            intent.putExtra("mode", "romantic")
-            startActivity(intent)
+            showModeSelectionDialog("romantic")
         }
 
         hotButton.setOnClickListener {
-            val intent = Intent(this, GameActivity::class.java)
-            intent.putExtra("mode", "hot")
-            startActivity(intent)
+            showModeSelectionDialog("hot")
         }
+    }
+
+    private fun showModeSelectionDialog(mode: String) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.pair_selection_dialog, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        val pairs = getSavedPairs()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, pairs)
+        dialogView.findViewById<Spinner>(R.id.pairsSpinner).adapter = adapter
+
+        dialogView.findViewById<Button>(R.id.startGameButton).setOnClickListener {
+            if (pairs.isNotEmpty()) {
+                val selectedPair = pairs[dialogView.findViewById<Spinner>(R.id.pairsSpinner).selectedItemPosition]
+                startGame(mode, selectedPair)
+                dialog.dismiss()
+            } else {
+                Toast.makeText(this, "Нет сохраненных пар", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialogView.findViewById<Button>(R.id.createNewPairButton).setOnClickListener {
+            dialog.dismiss()
+            showCreateNewPairDialog(mode)
+        }
+
+        dialog.show()
+    }
+
+    private fun showCreateNewPairDialog(mode: String) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.player_names, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        dialogView.findViewById<Button>(R.id.confirmButton).setOnClickListener {
+            val player1 = dialogView.findViewById<TextInputEditText>(R.id.player1Input).text?.toString()?.trim()?.takeIf { it.isNotBlank() } ?: "1"
+            val player2 = dialogView.findViewById<TextInputEditText>(R.id.player2Input).text?.toString()?.trim()?.takeIf { it.isNotBlank() } ?: "2"
+
+            val pairName = "${player1}-${player2}".replace(" ", "_")
+            startGame(mode, pairName)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun startGame(mode: String, pairName: String) {
+        val intent = Intent(this, GameActivity::class.java).apply {
+            putExtra("mode", mode)
+            putExtra("pairName", pairName)
+        }
+        startActivity(intent)
     }
 
     private fun showProfilesDialog() {
