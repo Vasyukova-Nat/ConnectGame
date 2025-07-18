@@ -1,15 +1,12 @@
 package com.example.connectgame
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.material.textfield.TextInputEditText
 import java.io.File
 
 class GameActivity : AppCompatActivity() {
@@ -84,11 +81,13 @@ class GameActivity : AppCompatActivity() {
 
     private fun setupPairStorage() {
         val pairName = intent.getStringExtra("pairName") ?: return
-        val pairsFolder = File(filesDir, "pairs")
-        if (!pairsFolder.exists()) pairsFolder.mkdirs()
+        val pairsFolder = File(filesDir, "pairs").apply {
+            if (!exists()) mkdirs()
+        }
 
-        currentPairFolder = File(pairsFolder, pairName)
-        if (!currentPairFolder.exists()) currentPairFolder.mkdirs()
+        currentPairFolder = File(pairsFolder, pairName).apply {
+            if (!exists()) mkdirs()
+        }
     }
 
     private fun applyHotThemeColors() {

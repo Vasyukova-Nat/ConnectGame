@@ -112,12 +112,101 @@ class MainActivity : AppCompatActivity() {
             dialog.dismiss()
         }
 
+        dialogView.findViewById<Button>(R.id.editNamesButton).setOnClickListener {
+            val selectedPair = pairs[dialogView.findViewById<Spinner>(R.id.profilesSpinner).selectedItemPosition]
+            showEditNamesDialog(selectedPair, dialog)
+        }
+
         dialogView.findViewById<Button>(R.id.deleteProfileButton).setOnClickListener {
             val selectedPair = pairs[dialogView.findViewById<Spinner>(R.id.profilesSpinner).selectedItemPosition]
             confirmDeleteProfile(selectedPair, dialog)
         }
 
         dialog.show()
+    }
+
+    private fun showEditNamesDialog(oldPairName: String, parentDialog: AlertDialog) {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.edit_names_dialog, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        val (oldPlayer1, oldPlayer2) = oldPairName.split("-").map { it.replace("_", " ") }
+        dialogView.findViewById<TextInputEditText>(R.id.player1Input).setText(oldPlayer1)
+        dialogView.findViewById<TextInputEditText>(R.id.player2Input).setText(oldPlayer2)
+
+        dialogView.findViewById<Button>(R.id.saveButton).setOnClickListener {
+            val newPlayer1 = dialogView.findViewById<TextInputEditText>(R.id.player1Input).text?.toString()?.trim() ?: ""
+            val newPlayer2 = dialogView.findViewById<TextInputEditText>(R.id.player2Input).text?.toString()?.trim() ?: ""
+
+            if (newPlayer1.isEmpty() || newPlayer2.isEmpty()) {
+                Toast.makeText(this, "Введите имена обоих игроков", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (newPlayer1 == newPlayer2) {
+                Toast.makeText(this, "Имена игроков не должны совпадать", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            val newPairName = "${newPlayer1}-${newPlayer2}".replace(" ", "_")
+            if (renamePair(oldPairName, newPairName)) {
+                Toast.makeText(this, "Имена успешно изменены", Toast.LENGTH_SHORT).show()
+                parentDialog.dismiss()
+                dialog.dismiss()
+                showProfilesDialog()
+            } else {
+                Toast.makeText(this, "Ошибка при изменении имен", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        dialogView.findViewById<Button>(R.id.cancelButton).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun renamePair(oldPairName: String, newPairName: String): Boolean {
+        if (oldPairName == newPairName) return true
+
+        val pairsDir = File(filesDir, "pairs")
+        val oldDir = File(pairsDir, oldPairName)
+        val newDir = File(pairsDir, newPairName)
+
+        if (!oldDir.exists()) return false
+        if (newDir.exists()) {
+            Toast.makeText(this, "Пара с такими именами уже существует", Toast.LENGTH_SHORT).show()
+            return false
+        }
+
+        val oldPlayers = oldPairName.split("-")
+        val newPlayers = newPairName.split("-")
+
+        val tempDir = File(pairsDir, "temp_${System.currentTimeMillis()}")
+        if (!tempDir.mkdirs()) return false
+
+        try {
+            oldDir.listFiles()?.forEach { oldFile ->
+                val newFileName = when {
+                    oldFile.name.startsWith("${oldPlayers[0]}_used_") ->
+                        oldFile.name.replace("${oldPlayers[0]}_used_", "${newPlayers[0]}_used_")
+                    oldFile.name.startsWith("${oldPlayers[1]}_used_") ->
+                        oldFile.name.replace("${oldPlayers[1]}_used_", "${newPlayers[1]}_used_")
+                    else -> oldFile.name
+                }
+
+                oldFile.copyTo(File(tempDir, newFileName))
+            }
+
+            oldDir.deleteRecursively()
+
+            return tempDir.renameTo(newDir)
+        } catch (e: Exception) {
+            tempDir.deleteRecursively()
+            return false
+        }
     }
 
     private fun openProfileHistory(pairName: String) {
