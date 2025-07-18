@@ -6,9 +6,10 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:layout_marginTop="18dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -19,7 +20,7 @@
                 android:id="@+id/exportButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Экспорт"/>
+                android:text="Экспорт" />
 
             <Button
                 android:id="@+id/importButton"
@@ -32,7 +33,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -43,27 +44,26 @@
                 android:id="@+id/editButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Редактировать"/>
+                android:text="Редактировать" />
 
             <Button
                 android:id="@+id/saveButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Сохранить"
-                android:visibility="gone"/>
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
-
+        android:layout_height="match_parent">
         <LinearLayout
             android:id="@+id/historyContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="16dp">
 
             <TextView
                 android:id="@+id/historyTextView"
