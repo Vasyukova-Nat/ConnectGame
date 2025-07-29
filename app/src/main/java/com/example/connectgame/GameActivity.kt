@@ -1,10 +1,12 @@
 package com.example.connectgame
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import java.io.File
@@ -112,31 +114,32 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getUsedQuestionsFile(playerName: String, source: String): File {
-        return File(currentPairFolder, "${playerName}_used_${source}_questions.txt")
+        return File(currentPairFolder, "${playerName}_used_${source}_questions.txt").apply {
+            if (!exists()) createNewFile()
+        }
     }
 
     private fun getUsedActionsFile(playerName: String, source: String): File {
-        return File(currentPairFolder, "${playerName}_used_${source}_actions.txt")
+        return File(currentPairFolder, "${playerName}_used_${source}_actions.txt").apply {
+            if (!exists()) createNewFile()
+        }
     }
 
     private fun loadUsedQuestions(playerName: String): Set<String> {
         val usedQuestions = mutableSetOf<String>()
 
-        if (mode == "romantic") {
-            File(currentPairFolder, "${playerName}_used_both_questions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
-            File(currentPairFolder, "${playerName}_used_romantic_questions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
-        }
-        else if (mode == "friends") {
-            File(currentPairFolder, "${playerName}_used_both_questions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
-            File(currentPairFolder, "${playerName}_used_friends_questions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
-        }
-        else if (mode == "hot") {
-            File(currentPairFolder, "${playerName}_used_hot_questions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedQuestions.addAll(it) }
+        when (mode) {
+            "romantic" -> {
+                loadItemsFromFile(playerName, "both", "questions")?.let { usedQuestions.addAll(it) }
+                loadItemsFromFile(playerName, "romantic", "questions")?.let { usedQuestions.addAll(it) }
+            }
+            "friends" -> {
+                loadItemsFromFile(playerName, "both", "questions")?.let { usedQuestions.addAll(it) }
+                loadItemsFromFile(playerName, "friends", "questions")?.let { usedQuestions.addAll(it) }
+            }
+            "hot" -> {
+                loadItemsFromFile(playerName, "hot", "questions")?.let { usedQuestions.addAll(it) }
+            }
         }
 
         return usedQuestions
@@ -145,45 +148,78 @@ class GameActivity : AppCompatActivity() {
     private fun loadUsedActions(playerName: String): Set<String> {
         val usedActions = mutableSetOf<String>()
 
-        if (mode == "romantic") {
-            File(currentPairFolder, "${playerName}_used_both_actions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
-            File(currentPairFolder, "${playerName}_used_romantic_actions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
-        }
-        else if (mode == "friends") {
-            File(currentPairFolder, "${playerName}_used_both_actions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
-            File(currentPairFolder, "${playerName}_used_friends_actions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
-        }
-        else if (mode == "hot") {
-            File(currentPairFolder, "${playerName}_used_hot_actions.txt")
-                .takeIf { it.exists() }?.readLines()?.let { usedActions.addAll(it) }
+        when (mode) {
+            "romantic" -> {
+                loadItemsFromFile(playerName, "both", "actions")?.let { usedActions.addAll(it) }
+                loadItemsFromFile(playerName, "romantic", "actions")?.let { usedActions.addAll(it) }
+            }
+            "friends" -> {
+                loadItemsFromFile(playerName, "both", "actions")?.let { usedActions.addAll(it) }
+                loadItemsFromFile(playerName, "friends", "actions")?.let { usedActions.addAll(it) }
+            }
+            "hot" -> {
+                loadItemsFromFile(playerName, "hot", "actions")?.let { usedActions.addAll(it) }
+            }
         }
 
         return usedActions
     }
 
-    private fun saveUsedQuestion(playerName: String, question: String) {
-        val source = when {
-            bothQuestions.contains(question) -> "both"
-            romanticQuestions.contains(question) -> "romantic"
-            hotQuestions.contains(question) -> "hot"
-            else -> return
+    private fun loadItemsFromFile(playerName: String, source: String, type: String): List<String>? {
+        val fileName = "${playerName}_used_${source}_${type}.txt"
+        val file = File(currentPairFolder, fileName)
+
+        return if (file.exists()) {
+            try {
+                file.readLines()
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+            } catch (e: Exception) {
+                Log.e("GameActivity", "Error reading file $fileName", e)
+                null
+            }
+        } else {
+            null
         }
-        getUsedQuestionsFile(playerName, source).appendText("$question\n")
+    }
+
+    private fun saveUsedQuestion(playerName: String, question: String) {
+        try {
+            val source = when {
+                bothQuestions.contains(question) -> "both"
+                romanticQuestions.contains(question) -> "romantic"
+                hotQuestions.contains(question) -> "hot"
+                else -> return
+            }
+
+            val file = getUsedQuestionsFile(playerName, source)
+            val existing = loadItemsFromFile(playerName, source, "questions") ?: emptyList()
+            val newContent = (existing + question).joinToString("\n")
+            file.writeText(newContent)
+        } catch (e: Exception) {
+            Log.e("GameActivity", "Error saving question", e)
+            Toast.makeText(this, "Ошибка сохранения вопроса", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun saveUsedAction(playerName: String, action: String) {
-        val source = when {
-            bothActions.contains(action) -> "both"
-            friendsActions.contains(action) -> "friends"
-            romanticActions.contains(action) -> "romantic"
-            hotActions.contains(action) -> "hot"
-            else -> return
+        try {
+            val source = when {
+                bothActions.contains(action) -> "both"
+                friendsActions.contains(action) -> "friends"
+                romanticActions.contains(action) -> "romantic"
+                hotActions.contains(action) -> "hot"
+                else -> return
+            }
+
+            val file = getUsedActionsFile(playerName, source)
+            val existing = loadItemsFromFile(playerName, source, "actions") ?: emptyList()
+            val newContent = (existing + action).joinToString("\n")
+            file.writeText(newContent)
+        } catch (e: Exception) {
+            Log.e("GameActivity", "Error saving action", e)
+            Toast.makeText(this, "Ошибка сохранения действия", Toast.LENGTH_SHORT).show()
         }
-        getUsedActionsFile(playerName, source).appendText("$action\n")
     }
 
     private fun initUI() {
